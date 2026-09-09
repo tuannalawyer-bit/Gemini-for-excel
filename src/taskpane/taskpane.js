@@ -242,11 +242,22 @@ async function handleSendMessage() {
             fullUserPrompt = `[Dữ liệu vùng ô tính ${rangeContext.address}]:\n${JSON.stringify(rangeContext.values)}\n\n[Yêu cầu của người dùng]:\n${text}`;
         }
 
-        const systemInstruction = "Bạn là trợ lý AI chuyên gia về Microsoft Excel và phân tích dữ liệu. Bạn hỗ trợ phân tích số liệu, tạo công thức Excel chính xác, chuẩn hóa dữ liệu hoặc tóm tắt. Trả lời rõ ràng, định dạng đẹp mắt bằng markdown khi thích hợp.";
+        const systemInstruction = `Bạn là trợ lý AI chuyên gia về Microsoft Excel và phân tích dữ liệu.
+QUY TẮC BẮT BUỘC KHI TRẢ LỜI:
+1. Khi tạo bảng tính: Hãy định dạng bảng Markdown chuẩn với các cột ngăn cách bằng dấu '|' (Ví dụ: | Cột A | Cột B | Thực lĩnh |).
+2. Khi viết công thức: Hãy viết trực tiếp công thức Excel chuẩn tiếng Anh bắt đầu bằng dấu '=' trong ô tương ứng (Ví dụ: =SUM(B2:B10), =C2*D2, =IF(A2>0, "Đạt", "Trượt")).
+3. Tuyệt đối không đặt công thức trong dấu ngoặc kép hoặc ký tự lạ để hệ thống có thể chèn và thực thi công thức trực tiếp trong Excel.
+4. Trả lời súc tích, chuyên nghiệp.`;
 
         const resultText = await callGeminiAPI(apiKey, model, systemInstruction, fullUserPrompt);
         removeLoadingMessage(loadingId);
         appendMessage("assistant", resultText);
+
+        // TỰ ĐỘNG CHÈN VÀO EXCEL NẾU ĐƯỢC BẬT
+        const autoInsert = document.getElementById("autoInsertCheckbox")?.checked;
+        if (autoInsert) {
+            await parseAndInsertSmartly(resultText);
+        }
     } catch (err) {
         removeLoadingMessage(loadingId);
         appendMessage("assistant", `❌ Đã xảy ra lỗi: ${err.message}`);
@@ -263,7 +274,7 @@ function applyQuickAction(actionType) {
             input.value = "Hãy phân tích chi tiết các số liệu, chỉ số nổi bật, xu hướng và bất thường từ vùng dữ liệu này.";
             break;
         case "formula":
-            input.value = "Hãy tạo công thức Excel tối ưu nhất để giải quyết bảng dữ liệu này:";
+            input.value = "Hãy viết công thức Excel giải quyết yêu cầu sau (chỉ trả về công thức chuẩn bắt đầu bằng dấu =): ";
             break;
         case "clean":
             input.value = "Hãy kiểm tra và chỉ ra các lỗi định dạng, giá trị thiếu (null) hoặc dữ liệu trùng lặp trong bảng này.";
@@ -304,7 +315,124 @@ async function callGeminiAPI(apiKey, model, systemInstruction, promptText) {
     return candidate || "(Không có phản hồi)";
 }
 
-// Thêm tin nhắn vào khung chat
+// Bộ phân tích phản hồi từ Gemini: Tách bảng, tách công thức
+function parseGeminiResponse(text) {
+    const lines = text.split("\n");
+    const tableRows = [];
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        // Nhận diện dòng chứa bảng có dấu |
+        if (trimmed.includes("|")) {
+            // Bỏ qua dòng phân cách Markdown kiểu |---|---|
+            if (/^\|?[\s\-:|]+\|?$/.test(trimmed)) {
+                continue;
+            }
+            let rawCells = trimmed.split("|");
+            // Nếu có dấu | ở đầu và cuối thì bỏ phần tử rỗng
+            if (trimmed.startsWith("|")) rawCells.shift();
+            if (trimmed.endsWith("|")) rawCells.pop();
+
+            const cells = rawCells.map(c => c.trim().replace(/^`+|`+$/g, ""));
+            if (cells.length > 1 || (cells.length === 1 && cells[0] !== "")) {
+                tableRows.push(cells);
+            }
+        }
+    }
+
+    // Tìm công thức đơn lẻ (nếu không có bảng)
+    let singleFormula = null;
+    const formulaMatch = text.match(/(?:^|\s|`)(=[A-Z0-9_+\-*/^() ,:"'.]+)(?:`|\s|$)/m);
+    if (formulaMatch) {
+        singleFormula = formulaMatch[1].trim();
+    }
+
+    return {
+        hasTable: tableRows.length >= 2,
+        tableData: tableRows,
+        formula: singleFormula
+    };
+}
+
+// Chèn dữ liệu thông minh vào Sheet (Tự động nhận diện Bảng / Công thức / Văn bản)
+async function parseAndInsertSmartly(text) {
+    const parsed = parseGeminiResponse(text);
+
+    if (parsed.hasTable) {
+        await insertTableToExcel(parsed.tableData);
+    } else if (parsed.formula) {
+        await insertFormulaToExcel(parsed.formula);
+    } else {
+        await insertIntoActiveCell(text);
+    }
+}
+
+// Chèn toàn bộ bảng 2 chiều vào Excel (kèm kích hoạt công thức thực sự)
+async function insertTableToExcel(tableData) {
+    if (!tableData || tableData.length === 0) return;
+
+    try {
+        await Excel.run(async (context) => {
+            const activeCell = context.workbook.getActiveCell();
+            activeCell.load(["rowIndex", "columnIndex"]);
+            await context.sync();
+
+            const numRows = tableData.length;
+            const numCols = Math.max(...tableData.map(r => r.length));
+            const targetRange = activeCell.getResizedRange(numRows - 1, numCols - 1);
+
+            const matrix = [];
+            for (let r = 0; r < numRows; r++) {
+                const row = [];
+                for (let c = 0; c < numCols; c++) {
+                    let cellVal = (tableData[r][c] || "").trim();
+                    // Làm sạch ký tự thừa: **in đậm**, `code`
+                    cellVal = cellVal.replace(/\*\*/g, "").replace(/^`+|`+$/g, "").trim();
+
+                    // Nếu là công thức có dấu bằng
+                    if (cellVal.startsWith("=")) {
+                        row.push(cellVal);
+                    } else {
+                        // Kiểm tra nếu là số thuần túy hoặc số có dấu phẩy ngăn cách
+                        const cleanedNum = cellVal.replace(/,/g, "");
+                        if (!isNaN(cleanedNum) && cleanedNum !== "") {
+                            row.push(Number(cleanedNum));
+                        } else {
+                            row.push(cellVal);
+                        }
+                    }
+                }
+                matrix.push(row);
+            }
+
+            // Gán ma trận vào công thức của range (Excel tự động hiểu cả text, số và công thức =)
+            targetRange.formulas = matrix;
+            targetRange.format.autofitColumns();
+            await context.sync();
+        });
+    } catch (err) {
+        console.error("Lỗi khi chèn bảng:", err);
+        // Fallback: chèn nội dung vào ô đang chọn nếu không resize được
+        await insertIntoActiveCell(tableData.map(r => r.join("\t")).join("\n"));
+    }
+}
+
+// Chèn công thức đơn lẻ vào ô đang chọn
+async function insertFormulaToExcel(formulaStr) {
+    try {
+        await Excel.run(async (context) => {
+            const activeCell = context.workbook.getActiveCell();
+            let clean = formulaStr.trim().replace(/^`+|`+$/g, "");
+            if (!clean.startsWith("=")) clean = "=" + clean;
+            activeCell.formulas = [[clean]];
+            await context.sync();
+        });
+    } catch (err) {
+        alert("Lỗi chèn công thức: " + err.message);
+    }
+}
+
+// Thêm tin nhắn vào khung chat với các nút thao tác thông minh
 function appendMessage(role, text) {
     const container = document.getElementById("chatMessages");
     const msgDiv = document.createElement("div");
@@ -315,10 +443,34 @@ function appendMessage(role, text) {
     bubble.innerText = text;
     msgDiv.appendChild(bubble);
 
-    // Nếu là trợ lý AI, thêm nút hành động nhanh
+    // Nếu là trợ lý AI, thêm nút hành động thông minh
     if (role === "assistant") {
         const actionsDiv = document.createElement("div");
         actionsDiv.className = "msg-actions";
+
+        const parsed = parseGeminiResponse(text);
+
+        // Nếu phát hiện có bảng, thêm nút chèn toàn bộ bảng
+        if (parsed.hasTable) {
+            const tableBtn = document.createElement("button");
+            tableBtn.className = "btn-mini";
+            tableBtn.style.color = "#137333";
+            tableBtn.style.fontWeight = "600";
+            tableBtn.innerText = `📊 Chèn bảng (${parsed.tableData.length} dòng)`;
+            tableBtn.onclick = () => insertTableToExcel(parsed.tableData);
+            actionsDiv.appendChild(tableBtn);
+        }
+
+        // Nếu phát hiện có công thức
+        if (parsed.formula) {
+            const formulaBtn = document.createElement("button");
+            formulaBtn.className = "btn-mini";
+            formulaBtn.style.color = "#1a73e8";
+            formulaBtn.style.fontWeight = "600";
+            formulaBtn.innerText = `⚡ Chèn công thức vào ô`;
+            formulaBtn.onclick = () => insertFormulaToExcel(parsed.formula);
+            actionsDiv.appendChild(formulaBtn);
+        }
 
         const copyBtn = document.createElement("button");
         copyBtn.className = "btn-mini";
@@ -328,7 +480,7 @@ function appendMessage(role, text) {
         const insertBtn = document.createElement("button");
         insertBtn.className = "btn-mini";
         insertBtn.innerText = "📥 Chèn vào ô tính";
-        insertBtn.onclick = () => insertIntoActiveCell(text);
+        insertBtn.onclick = () => parseAndInsertSmartly(text);
 
         actionsDiv.appendChild(copyBtn);
         actionsDiv.appendChild(insertBtn);
@@ -345,7 +497,7 @@ function appendLoadingMessage() {
     const msgDiv = document.createElement("div");
     msgDiv.id = id;
     msgDiv.className = "message assistant";
-    msgDiv.innerHTML = `<div class="bubble" style="font-style:italic; color:#5f6368;">⏳ Gemini đang suy nghĩ và phân tích...</div>`;
+    msgDiv.innerHTML = `<div class="bubble" style="font-style:italic; color:#5f6368;">⏳ Gemini đang suy nghĩ và tính toán...</div>`;
     container.appendChild(msgDiv);
     container.scrollTop = container.scrollHeight;
     return id;
@@ -361,7 +513,6 @@ async function insertIntoActiveCell(text) {
     try {
         await Excel.run(async (context) => {
             const range = context.workbook.getActiveCell();
-            // Nếu là công thức bắt đầu bằng dấu =, gán vào formulas
             if (text.trim().startsWith("=")) {
                 range.formulas = [[text.trim()]];
             } else {

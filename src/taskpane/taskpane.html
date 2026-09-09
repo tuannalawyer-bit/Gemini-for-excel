@@ -52,8 +52,14 @@
 
         <!-- Input Box -->
         <div class="input-container">
-            <div class="context-indicator" id="contextIndicator">
-                📍 Vùng đang chọn: <span id="selectedRangeAddress">Chưa chọn</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div class="context-indicator" id="contextIndicator">
+                    📍 Vùng đang chọn: <span id="selectedRangeAddress">Chưa chọn</span>
+                </div>
+                <label style="font-size: 11px; color: #1a73e8; display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="autoInsertCheckbox" checked />
+                    ⚡ Tự chèn vào Excel
+                </label>
             </div>
             <div class="input-wrapper">
                 <textarea id="userPrompt" rows="2" placeholder="Nhập câu lệnh hoặc yêu cầu phân tích... (Ctrl+Enter để gửi)"></textarea>
