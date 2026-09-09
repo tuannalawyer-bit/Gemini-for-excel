@@ -1,0 +1,18 @@
+{
+  "name": "gemini-for-excel",
+  "version": "1.0.0",
+  "description": "Google Gemini AI Add-in for Microsoft Excel (Shared Runtime & BYOK)",
+  "scripts": {
+    "start": "python server.py",
+    "validate": "npx office-addin-manifest validate manifest.xml"
+  },
+  "keywords": [
+    "excel",
+    "office-addin",
+    "gemini",
+    "ai",
+    "custom-functions"
+  ],
+  "author": "Office AI",
+  "license": "MIT"
+}

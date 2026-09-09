@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp 
+          xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" 
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" 
+          xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+          xsi:type="TaskPaneApp">
+
+  <Id>d3b07384-d113-4927-9bf4-11882f0c74a9</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Office AI</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Gemini for Excel"/>
+  <Description DefaultValue="Trợ lý Gemini AI trong Excel: phân tích bảng tính, viết công thức, dịch thuật và hàm AI tùy chỉnh."/>
+  <IconUrl DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/assets/icon-80.png"/>
+  <SupportUrl DefaultValue="https://aistudio.google.com/"/>
+  <AppDomains>
+    <AppDomain>https://generativelanguage.googleapis.com</AppDomain>
+    <AppDomain>https://tuannalawyer-bit.github.io</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Workbook"/>
+  </Hosts>
+
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="SharedRuntime" MinVersion="1.1"/>
+      <Set Name="CustomFunctionsRuntime" MinVersion="1.3"/>
+    </Sets>
+  </Requirements>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/src/taskpane/taskpane.html"/>
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Workbook">
+        <Runtimes>
+          <Runtime resid="Taskpane.Url" lifetime="long" />
+        </Runtimes>
+
+        <AllFormFactors>
+          <!-- Cấu hình Custom Functions (Hàm công thức) -->
+          <ExtensionPoint xsi:type="CustomFunctions">
+            <Script>
+              <SourceLocation resid="Functions.Script.Url"/>
+            </Script>
+            <Page>
+              <SourceLocation resid="Taskpane.Url"/>
+            </Page>
+            <Metadata>
+              <SourceLocation resid="Functions.Metadata.Url"/>
+            </Metadata>
+            <Namespace resid="Functions.Namespace"/>
+          </ExtensionPoint>
+
+          <!-- Cấu hình Ribbon Button (Nút trên thanh công cụ Excel) -->
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <CustomTab id="TabHome">
+              <Group id="GeminiGroup">
+                <Label resid="GroupLabel"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16"/>
+                  <bt:Image size="32" resid="Icon.32"/>
+                  <bt:Image size="80" resid="Icon.80"/>
+                </Icon>
+                <Control xsi:type="Button" id="TaskpaneButton">
+                  <Label resid="ButtonLabel"/>
+                  <Supertip>
+                    <Title resid="ButtonLabel"/>
+                    <Description resid="ButtonToolTip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16"/>
+                    <bt:Image size="32" resid="Icon.32"/>
+                    <bt:Image size="80" resid="Icon.80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>GeminiTaskpane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+              </Group>
+            </CustomTab>
+          </ExtensionPoint>
+        </AllFormFactors>
+      </Host>
+    </Hosts>
+
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16" DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/assets/icon-16.png"/>
+        <bt:Image id="Icon.32" DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/assets/icon-32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/assets/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/src/taskpane/taskpane.html"/>
+        <bt:Url id="Functions.Script.Url" DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/src/functions/functions.js"/>
+        <bt:Url id="Functions.Metadata.Url" DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/src/functions/functions.json"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="Functions.Namespace" DefaultValue="GEMINI"/>
+        <bt:String id="GroupLabel" DefaultValue="Gemini AI"/>
+        <bt:String id="ButtonLabel" DefaultValue="Gemini Assistant"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="ButtonToolTip" DefaultValue="Mở bảng điều khiển Gemini AI để phân tích bảng tính, viết công thức và quản lý API Key."/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

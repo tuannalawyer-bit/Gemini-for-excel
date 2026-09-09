@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gemini for Excel</title>
+
+    <!-- Office.js SDK -->
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+
+    <!-- Font & Stylesheet -->
+    <link rel="stylesheet" href="taskpane.css" />
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo-area">
+            <img src="../../assets/icon-32.png" alt="Gemini" class="app-logo" />
+            <div>
+                <h2>Gemini for Excel</h2>
+                <span id="connectionBadge" class="badge badge-warning">Chưa có API Key</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('chat')">💬 Trợ lý AI</button>
+        <button class="tab-btn" onclick="switchTab('formulas')">📐 Hàm Excel</button>
+        <button class="tab-btn" onclick="switchTab('settings')">⚙️ Cài đặt</button>
+    </nav>
+
+    <!-- TAB 1: CHAT & PHÂN TÍCH -->
+    <main id="tab-chat" class="tab-content active">
+        <!-- Quick Action Chips -->
+        <div class="quick-actions">
+            <span class="chip" onclick="applyQuickAction('analyze')">📊 Phân tích vùng chọn</span>
+            <span class="chip" onclick="applyQuickAction('formula')">⚡ Viết công thức</span>
+            <span class="chip" onclick="applyQuickAction('clean')">🧹 Chuẩn hóa dữ liệu</span>
+            <span class="chip" onclick="applyQuickAction('summarize')">📝 Tóm tắt nhanh</span>
+        </div>
+
+        <!-- Chat / Result Area -->
+        <div id="chatMessages" class="chat-container">
+            <div class="message system-message">
+                <div class="bubble">
+                    👋 <b>Xin chào!</b> Tôi là trợ lý Gemini AI trong Excel của bạn.<br/>
+                    Hãy bôi đen dữ liệu trên bảng tính rồi bấm một thao tác nhanh ở trên hoặc gõ câu hỏi bên dưới nhé!
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Box -->
+        <div class="input-container">
+            <div class="context-indicator" id="contextIndicator">
+                📍 Vùng đang chọn: <span id="selectedRangeAddress">Chưa chọn</span>
+            </div>
+            <div class="input-wrapper">
+                <textarea id="userPrompt" rows="2" placeholder="Nhập câu lệnh hoặc yêu cầu phân tích... (Ctrl+Enter để gửi)"></textarea>
+                <button id="sendBtn" class="primary-btn" onclick="handleSendMessage()">Gửi</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- TAB 2: HƯỚNG DẪN HÀM TÍNH -->
+    <section id="tab-formulas" class="tab-content">
+        <div class="guide-header">
+            <h3>Công thức Gemini trong ô tính</h3>
+            <p>Bạn có thể gõ các hàm này trực tiếp vào bất kỳ ô nào trên bảng tính như các hàm bình thường:</p>
+        </div>
+
+        <div class="formula-card">
+            <div class="formula-title"><code>=GEMINI.ASK(prompt, [context])</code></div>
+            <p class="formula-desc">Gửi yêu cầu phân tích hoặc xử lý dữ liệu ô tính bất kỳ.</p>
+            <div class="formula-example" onclick="copyText('=GEMINI.ASK(\"Phân loại khách hàng: Tiềm năng, Bình thường hay VIP\", A2)')">
+                <code>=GEMINI.ASK("Phân loại khách hàng: Tiềm năng, Bình thường hay VIP", A2)</code>
+                <span class="copy-hint">📋 Bấm để chép</span>
+            </div>
+        </div>
+
+        <div class="formula-card">
+            <div class="formula-title"><code>=GEMINI.TRANSLATE(text, targetLang)</code></div>
+            <p class="formula-desc">Dịch nội dung văn bản sang ngôn ngữ bạn muốn.</p>
+            <div class="formula-example" onclick="copyText('=GEMINI.TRANSLATE(A2, \"tiếng Anh\")')">
+                <code>=GEMINI.TRANSLATE(A2, "tiếng Anh")</code>
+                <span class="copy-hint">📋 Bấm để chép</span>
+            </div>
+        </div>
+
+        <div class="formula-card">
+            <div class="formula-title"><code>=GEMINI.EXTRACT(text, whatToExtract)</code></div>
+            <p class="formula-desc">Bóc tách Email, Số điện thoại, Địa chỉ, Mã đơn hàng từ văn bản thô.</p>
+            <div class="formula-example" onclick="copyText('=GEMINI.EXTRACT(A2, \"số điện thoại\")')">
+                <code>=GEMINI.EXTRACT(A2, "số điện thoại")</code>
+                <span class="copy-hint">📋 Bấm để chép</span>
+            </div>
+        </div>
+
+        <div class="formula-card">
+            <div class="formula-title"><code>=GEMINI.FORMULA(request, [sample])</code></div>
+            <p class="formula-desc">Tự động viết công thức Excel dựa trên mô tả tiếng Việt.</p>
+            <div class="formula-example" onclick="copyText('=GEMINI.FORMULA(\"Tính tổng cột B nếu cột C ghi Đã xong\", A2:C10)')">
+                <code>=GEMINI.FORMULA("Tính tổng cột B nếu cột C ghi Đã xong", A2:C10)</code>
+                <span class="copy-hint">📋 Bấm để chép</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 3: CÀI ĐẶT (BYOK) -->
+    <section id="tab-settings" class="tab-content">
+        <div class="settings-group">
+            <label for="apiKeyInput">Gemini API Key cá nhân của bạn:</label>
+            <div class="password-wrapper">
+                <input type="password" id="apiKeyInput" placeholder="Dán khóa AI Studio tại đây (AIzaSy...)" />
+                <button type="button" class="icon-btn" onclick="togglePasswordVisibility()">👁️</button>
+            </div>
+            <small class="help-text">
+                Khóa được lưu cục bộ trên máy bạn và không gửi đi bất kỳ đâu trừ Google API.<br/>
+                👉 <a href="https://aistudio.google.com/app/apikey" target="_blank">Bấm vào đây để lấy API Key miễn phí</a>
+            </small>
+        </div>
+
+        <div class="settings-group">
+            <label for="modelSelect">Mô hình AI cho Sidebar (Chat & Phân tích):</label>
+            <select id="modelSelect" onchange="handleModelChange()">
+                <option value="gemini-3.7-flash" selected>gemini-3.7-flash (Khuyên dùng - Cân bằng & Thông minh)</option>
+                <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Siêu tốc & Tiết kiệm)</option>
+                <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview (Suy luận phức tạp)</option>
+                <option value="custom">Tự nhập model khác...</option>
+            </select>
+            <input type="text" id="customModelInput" placeholder="Nhập tên model..." style="display:none; margin-top:6px;" />
+        </div>
+
+        <div class="settings-group">
+            <label for="formulaModelSelect">Mô hình AI cho Công thức ô tính (=GEMINI.*):</label>
+            <select id="formulaModelSelect">
+                <option value="gemini-3.5-flash-lite" selected>gemini-3.5-flash-lite (Khuyên dùng - Tối ưu cho nhiều dòng)</option>
+                <option value="gemini-3.7-flash">gemini-3.7-flash</option>
+            </select>
+        </div>
+
+        <div class="settings-actions">
+            <button class="primary-btn" onclick="saveSettings()">💾 Lưu Cài Đặt</button>
+            <button class="secondary-btn" onclick="testConnection()">🧪 Kiểm tra kết nối</button>
+        </div>
+
+        <div id="settingsNotice" class="notice" style="display:none;"></div>
+
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;" />
+        <div class="settings-group">
+            <button class="text-btn text-danger" onclick="clearLocalCache()">🗑️ Xóa bộ đệm kết quả (Cache)</button>
+        </div>
+    </section>
+
+    <!-- Script kết nối -->
+    <script src="../functions/functions.js"></script>
+    <script src="taskpane.js"></script>
+</body>
+</html>

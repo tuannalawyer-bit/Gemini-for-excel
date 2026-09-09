@@ -1,0 +1,424 @@
+:root {
+    --primary: #1a73e8;
+    --primary-hover: #1557b0;
+    --primary-light: #e8f0fe;
+    --bg-main: #ffffff;
+    --bg-alt: #f8f9fa;
+    --border: #dadce0;
+    --text-main: #202124;
+    --text-muted: #5f6368;
+    --success: #1e8e3e;
+    --warning: #f9ab00;
+    --danger: #d93025;
+    --radius: 8px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    color: var(--text-main);
+    background-color: var(--bg-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Header */
+.app-header {
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.app-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+}
+
+.logo-area h2 {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.badge-success { background: #e6f4ea; color: var(--success); }
+.badge-warning { background: #fef7e0; color: #b06000; }
+.badge-danger { background: #fce8e6; color: var(--danger); }
+
+/* Navigation Tabs */
+.nav-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-alt);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 4px;
+    background: none;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: var(--bg-main);
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+}
+
+.tab-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Quick Action Chips */
+.quick-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.chip {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+}
+
+.chip:hover {
+    background: #d2e3fc;
+}
+
+/* Chat Area */
+.chat-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 10px;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    max-width: 92%;
+}
+
+.message.user {
+    align-self: flex-end;
+}
+
+.message.assistant, .message.system-message {
+    align-self: flex-start;
+}
+
+.bubble {
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    line-height: 1.45;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+.user .bubble {
+    background: var(--primary);
+    color: #fff;
+    border-bottom-right-radius: 2px;
+}
+
+.assistant .bubble {
+    background: #f1f3f4;
+    color: var(--text-main);
+    border-bottom-left-radius: 2px;
+    border: 1px solid #e8eaed;
+}
+
+.system-message .bubble {
+    background: #f8f9fa;
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
+}
+
+.msg-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.btn-mini {
+    background: none;
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-muted);
+    background: #fff;
+}
+
+.btn-mini:hover {
+    background: var(--bg-alt);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Input Area */
+.input-container {
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+}
+
+.context-indicator {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.input-wrapper {
+    display: flex;
+    gap: 8px;
+}
+
+textarea {
+    flex: 1;
+    resize: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+/* Buttons */
+.primary-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.primary-btn:hover {
+    background: var(--primary-hover);
+}
+
+.secondary-btn {
+    background: #fff;
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secondary-btn:hover {
+    background: var(--bg-alt);
+}
+
+.text-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 6px 0;
+}
+
+.text-danger {
+    color: var(--danger);
+}
+
+/* Formula Guide Cards */
+.guide-header {
+    margin-bottom: 14px;
+}
+
+.guide-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.guide-header p {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.formula-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+}
+
+.formula-title code {
+    font-weight: 700;
+    color: #137333;
+    font-size: 12px;
+}
+
+.formula-desc {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin: 4px 0 6px 0;
+}
+
+.formula-example {
+    background: var(--bg-alt);
+    border-radius: 4px;
+    padding: 6px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border: 1px solid #edf0f2;
+}
+
+.formula-example:hover {
+    background: #eef3fc;
+}
+
+.formula-example code {
+    font-size: 11px;
+    color: #1a73e8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 80%;
+}
+
+.copy-hint {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* Settings Form */
+.settings-group {
+    margin-bottom: 14px;
+}
+
+.settings-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.password-wrapper {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.password-wrapper input {
+    flex: 1;
+    border: none;
+    padding: 8px 10px;
+    font-size: 13px;
+    outline: none;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    padding: 0 10px;
+    cursor: pointer;
+}
+
+select, input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12.5px;
+    outline: none;
+}
+
+select:focus, input[type="text"]:focus {
+    border-color: var(--primary);
+}
+
+.help-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 5px;
+    display: block;
+    line-height: 1.4;
+}
+
+.help-text a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.settings-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.notice {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.notice-success { background: #e6f4ea; color: var(--success); }
+.notice-danger { background: #fce8e6; color: var(--danger); }

@@ -1,0 +1,90 @@
+{
+  "functions": [
+    {
+      "id": "ASK",
+      "name": "ASK",
+      "description": "Gửi câu lệnh tới Gemini AI để trả lời, phân tích hoặc xử lý dữ liệu ô tính",
+      "helpUrl": "https://aistudio.google.com/",
+      "parameters": [
+        {
+          "name": "prompt",
+          "description": "Câu lệnh yêu cầu (Ví dụ: 'Phân loại tâm trạng', 'Tóm tắt nội dung')",
+          "type": "string"
+        },
+        {
+          "name": "context",
+          "description": "Ô tính hoặc vùng dữ liệu cần phân tích (Tùy chọn)",
+          "type": "any",
+          "optional": true
+        }
+      ],
+      "result": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "TRANSLATE",
+      "name": "TRANSLATE",
+      "description": "Dịch văn bản sang ngôn ngữ chỉ định bằng Gemini AI",
+      "helpUrl": "https://aistudio.google.com/",
+      "parameters": [
+        {
+          "name": "text",
+          "description": "Văn bản hoặc ô cần dịch",
+          "type": "string"
+        },
+        {
+          "name": "targetLanguage",
+          "description": "Ngôn ngữ đích (Ví dụ: 'tiếng Anh', 'tiếng Nhật', 'tiếng Hàn', 'en', 'ja')",
+          "type": "string"
+        }
+      ],
+      "result": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "EXTRACT",
+      "name": "EXTRACT",
+      "description": "Trích xuất thông tin đặc thù (Email, SĐT, Số tiền, Ngày tháng, Địa chỉ...) từ văn bản",
+      "helpUrl": "https://aistudio.google.com/",
+      "parameters": [
+        {
+          "name": "text",
+          "description": "Chuỗi văn bản thô cần bóc tách",
+          "type": "string"
+        },
+        {
+          "name": "whatToExtract",
+          "description": "Loại thông tin cần lấy (Ví dụ: 'email', 'số điện thoại', 'họ tên')",
+          "type": "string"
+        }
+      ],
+      "result": {
+        "type": "string"
+      }
+    },
+    {
+      "id": "FORMULA",
+      "name": "FORMULA",
+      "description": "Tự động sinh công thức Excel chuẩn từ mô tả yêu cầu bằng tiếng Việt",
+      "helpUrl": "https://aistudio.google.com/",
+      "parameters": [
+        {
+          "name": "request",
+          "description": "Mô tả tính toán mong muốn (Ví dụ: 'Tính tổng cột B nếu cột A là Hoàn thành')",
+          "type": "string"
+        },
+        {
+          "name": "sampleData",
+          "description": "Ô hoặc vùng ô minh họa cấu trúc dữ liệu (Tùy chọn)",
+          "type": "any",
+          "optional": true
+        }
+      ],
+      "result": {
+        "type": "string"
+      }
+    }
+  ]
+}
