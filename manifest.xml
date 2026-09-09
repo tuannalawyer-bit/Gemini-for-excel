@@ -11,7 +11,7 @@
   <ProviderName>Office AI</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Gemini for Excel"/>
-  <Description DefaultValue="Trợ lý Gemini AI trong Excel: phân tích bảng tính, viết công thức, dịch thuật và hàm AI tùy chỉnh."/>
+  <Description DefaultValue="Tro ly Gemini AI trong Excel: phan tich bang tinh, viet cong thuc va ham AI tuy chinh."/>
   <IconUrl DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/assets/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://tuannalawyer-bit.github.io/Gemini-for-excel/assets/icon-80.png"/>
   <SupportUrl DefaultValue="https://aistudio.google.com/"/>
@@ -26,7 +26,6 @@
 
   <Requirements>
     <Sets DefaultMinVersion="1.1">
-      <Set Name="SharedRuntime" MinVersion="1.1"/>
       <Set Name="CustomFunctionsRuntime" MinVersion="1.3"/>
     </Sets>
   </Requirements>
@@ -44,8 +43,8 @@
           <Runtime resid="Taskpane.Url" lifetime="long" />
         </Runtimes>
 
+        <!-- Khai bao Custom Functions cho moi nen tang -->
         <AllFormFactors>
-          <!-- Cấu hình Custom Functions (Hàm công thức) -->
           <ExtensionPoint xsi:type="CustomFunctions">
             <Script>
               <SourceLocation resid="Functions.Script.Url"/>
@@ -58,10 +57,12 @@
             </Metadata>
             <Namespace resid="Functions.Namespace"/>
           </ExtensionPoint>
+        </AllFormFactors>
 
-          <!-- Cấu hình Ribbon Button (Nút trên thanh công cụ Excel) -->
+        <!-- Khai bao nút Ribbon tren Desktop Form Factor -->
+        <DesktopFormFactor>
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
-            <CustomTab id="TabHome">
+            <OfficeTab id="TabHome">
               <Group id="GeminiGroup">
                 <Label resid="GroupLabel"/>
                 <Icon>
@@ -86,9 +87,9 @@
                   </Action>
                 </Control>
               </Group>
-            </CustomTab>
+            </OfficeTab>
           </ExtensionPoint>
-        </AllFormFactors>
+        </DesktopFormFactor>
       </Host>
     </Hosts>
 
@@ -109,7 +110,7 @@
         <bt:String id="ButtonLabel" DefaultValue="Gemini Assistant"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="ButtonToolTip" DefaultValue="Mở bảng điều khiển Gemini AI để phân tích bảng tính, viết công thức và quản lý API Key."/>
+        <bt:String id="ButtonToolTip" DefaultValue="Mo bang dieu khien Gemini AI de phan tich bang tinh va viet cong thuc."/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
